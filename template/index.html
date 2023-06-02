@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <style>
+
+
+    </style>
+  <title>Beautiful Text Display</title>
+</head>
+
+<body class="bg-blue-100">
+ <div
+      class='w-full bg-[#0f172a] h-full min-h-[100vh]
+      py-4
+      px-4
+      md:px-20'
+    >
+      <div class='w-full'>
+        <div
+          class='flex flex-row justify-between items-center
+        w-full h-10 px-5 2xl:px-40'
+        >
+          <h3 class='cursor-pointer text-3xl font-bold text-cyan-600'>
+            Summary!
+          </h3>
+
+        </div>
+
+        <div
+          class='flex flex-col items-center justify-center mt-4 p-4'
+        >
+          <h1 class='text-3xl text-white text-center leading-10 font-semi-bold'>
+            Summarizer with
+            <br />
+            <span class='text-5xl font-bold text-cyan-500'>OpenAI GPT</span>
+          </h1>
+          <p class='mt-5 text-lg text-gray-500 sm:text-xl text-center max-w-2xl'>
+            Simple TextBook Summarizer Powererd by Open AI GPT
+          </p>
+        </div>
+
+        <div class='flex flex-col w-full items-center justify-center mt-5'>
+          <textarea
+            placeholder='Paste doc content here ...'
+            rows={6}
+            class='block w-full md:w-[650px] rounded-md border border-slate-700
+            bg-slate-800 p-2 text-sm shadow-lg font-medium text-white focus:border-gray-500
+             focus:outline-none focus:ring-0'
+            id="input"
+          ></textarea>
+
+
+              <p class='text-md text-cyan-500 mt-5'>Please wait ....</p>
+              <button
+                class='mt-5 bg-blue-500 px-5 py-2 text-white text-md font-
+            cursor-pointer rounded-md'
+                onclick=""
+              >
+                Submit
+              </button>
+        </div>
+      </div>
+    </div>
+</body>
+<script>
+  function sendData(){
+  var input = document.getbyId("input")
+   $.ajax({
+      type: 'POST',
+      url: '/process',
+      data: input,
+      success: function(response) {
+        // Handle the response from Flask
+        console.log(response);
+      });
+
+  }
+</script>
+</html>
