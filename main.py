@@ -15,7 +15,6 @@ def process():
     # res=data
     # print(data["input"])
     # return jsonify(res)
-    co = cohere.Client('xjllaKYUXWTo0XM1dxRwAzPbI3xGSeGQvcJRN5Pg')  # This is your trial API key
     # eg = 'With example explain'
     # text = '''
     # Indian economy: Right from independence, the modernisation of the economy, economic self-sufficiency, and social justice have been the characteristics of the Indian economy. India wanted to acquire modernity and self-reliance by establishing industries. We wanted to establish an economy based on social justice through planning. For this, the National Planning Commission was established to coordinate development through the policy of Five Year Plans.
