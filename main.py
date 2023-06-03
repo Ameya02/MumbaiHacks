@@ -1,6 +1,10 @@
 from flask import Flask, render_template,url_for, request,redirect, jsonify
 import openai
 import os
+import requests
+from PIL import Image
+from io import BytesIO
+
 app = Flask(__name__,template_folder='template')
 
 
@@ -70,6 +74,42 @@ def TextToImg():
 #    url = img["url"]
 #    return jsonify(url)
 
+@app.route("/generate_image", methods=['POST'])
+def generate_image():
+
+# Define the URL of the Flask server
+  server_url = os.getenv("IMAGE_SERVER")  # Replace with the appropriate server URL
+
+# Define the prompt for generating the image
+  # prompt = '''Panel 1: A man in a labcoat stands in front of a science experiment with a rocket and a table with books on it
+  # Panel 2: The man is pointing to the rocket and saying, “This is Newton's Third Law of Motion. For every action there is an equal and opposite reaction!”
+  # Panel 3: The rocket is launched taking off from the table and the books on it are thrown backwards as the rocket moves forward.
+  # Panel 4: The man says, “See? Every action has an equal and opposite reaction'''
+
+# Define the API endpoint URL for generating images
+  endpoint_url = f'{server_url}/generate_images'
+
+# Send a POST request to the server to generate the image
+  response = requests.post(endpoint_url, json={'prompt': prompt})
+
+# Check if the request was successful
+  if response.status_code == 200:
+    # Retrieve the image file from the response
+    image_file = response.content
+    
+    # Save the image file locally
+    with open('./static/img/generated_image.png', 'wb') as file:
+        file.write(image_file)
+
+    
+    # Display or use the image data as needed in the frontend
+    # ...
+    data = {"image": "./static/img/generated_image.png"}
+    return jsonify(data)
+  else:
+    print('Error generating the image.')
+
+
 
 
 
@@ -101,7 +141,7 @@ def easyexplain(var):
   return [response.choices[0].text.strip(), resp2]
 
 def generate_analogy(prompt):
-  openai.api_key = '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'
+  openai.api_key = os.getenv('OPENAI_API_KEY')
 
     # Generate text with GPT-3.5 model
   print(" analogy  ")
