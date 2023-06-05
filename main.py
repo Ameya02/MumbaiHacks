@@ -4,6 +4,8 @@ import os
 import requests
 from PIL import Image
 from io import BytesIO
+import uuid
+import PyPDF2
 
 app = Flask(__name__,template_folder='template')
 
@@ -17,6 +19,7 @@ def index():
 def process():
     data = request.json
     # # Process the data as needed
+    var = data["input"]
     resp1,resp2=easyexplain(data["input"])
     # res=data
     # print(data["input"])
@@ -38,7 +41,12 @@ def process():
     #     stop_sequences=[],
     #     return_likelihoods='NONE'
     # )
-    data = {"text":resp1,"text2":resp2}
+
+    panel = f"create an comic  with different panel  for this example  :  {var}"
+    analogy = generate_analogy(panel)
+    print(f"the Panel is {analogy}")
+    img =generate_image(analogy)
+    data = {"text":resp1,"text2":resp2,"img":img}
     return jsonify(data)
 
 
@@ -74,23 +82,21 @@ def TextToImg():
 #    url = img["url"]
 #    return jsonify(url)
 
-@app.route("/generate_image", methods=['POST'])
-def generate_image():
+
+def generate_image(panel):
 
 # Define the URL of the Flask server
-  server_url = os.getenv("IMAGE_SERVER")  # Replace with the appropriate server URL
+  server_url = os.getenv("IMAGE_SERVER") # Replace with the appropriate server URL
+  filename = str(uuid.uuid4()) + '.png'
 
 # Define the prompt for generating the image
-  # prompt = '''Panel 1: A man in a labcoat stands in front of a science experiment with a rocket and a table with books on it
-  # Panel 2: The man is pointing to the rocket and saying, “This is Newton's Third Law of Motion. For every action there is an equal and opposite reaction!”
-  # Panel 3: The rocket is launched taking off from the table and the books on it are thrown backwards as the rocket moves forward.
-  # Panel 4: The man says, “See? Every action has an equal and opposite reaction'''
+ 
 
 # Define the API endpoint URL for generating images
   endpoint_url = f'{server_url}/generate_images'
 
 # Send a POST request to the server to generate the image
-  response = requests.post(endpoint_url, json={'prompt': prompt})
+  response = requests.post(endpoint_url, json={'prompt': panel})
 
 # Check if the request was successful
   if response.status_code == 200:
@@ -98,16 +104,37 @@ def generate_image():
     image_file = response.content
     
     # Save the image file locally
-    with open('./static/img/generated_image.png', 'wb') as file:
+    with open('./static/img/'+filename, 'wb') as file:
         file.write(image_file)
 
     
     # Display or use the image data as needed in the frontend
     # ...
-    data = {"image": "./static/img/generated_image.png"}
-    return jsonify(data)
+    return "./static/img/"+filename
+  
+    
   else:
     print('Error generating the image.')
+
+
+@app.route('/upload', methods=['POST'])
+def upload_file():
+    openai.api_key = os.getenv("OPENAI_API_KEY")
+    file = request.files["file"]
+    with open(file, 'rb') as file:
+        pdf = PyPDF2.PdfFileReader(file)
+        text = ""
+        for page_num in range(pdf.numPages):
+            page = pdf.getPage(page_num)
+            text += page.extractText()
+    response = openai.Completion.create(
+    engine='text-davinci-003',
+    prompt=text,
+    max_tokens=100
+)
+    generated_text = response.choices[0].text
+    data = {"pdftext":generated_text}
+    return jsonify(data)
 
 
 
@@ -119,7 +146,9 @@ def generate_image():
 def easyexplain(var):
   
   # Set up your OpenAI API credentials
+  print(os.environ.get("OPENAI_API_KEY"))
   openai.api_key = os.getenv("OPENAI_API_KEY")
+
 
   # Prompt for the model to generate child-like speech
 
@@ -141,7 +170,7 @@ def easyexplain(var):
   return [response.choices[0].text.strip(), resp2]
 
 def generate_analogy(prompt):
-  openai.api_key = os.getenv('OPENAI_API_KEY')
+  openai.api_key =  os.getenv("OPENAI_API_KEY")
 
     # Generate text with GPT-3.5 model
   print(" analogy  ")
@@ -153,6 +182,7 @@ def generate_analogy(prompt):
         n=1,
         stop=None,
     )
+
 
     # Return the generated analogy
   return response.choices[0].text.strip()
